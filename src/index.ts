@@ -1,12 +1,34 @@
-import getSheetValues from './getSheetValues'
+import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet
 
 declare var global: any
 
-global.main = (): void => {
-  const sheetName = 'テスト'
-  const ss = SpreadsheetApp.getActiveSpreadsheet()
-  const sheet = ss.getSheetByName(sheetName)
-  const columns = ['LastName', 'FirstName', 'Remarks']
-  const values = getSheetValues(ss, sheetName, columns)
-  console.log(values)
+global.getSheetValues = (
+  Spreadsheet: Spreadsheet,
+  sheetName: string,
+  columns: Array<string>
+) => {
+  const sheet = Spreadsheet.getSheetByName(sheetName)
+  const values = sheet.getDataRange().getValues()
+  const colObj = []
+  const result = []
+
+  values[0].map(item => {
+    columns.map((col, i) => {
+      if (item === col) {
+        colObj.push({ colName: col, colNum: i })
+      }
+    })
+  })
+
+  values.map((item, row) => {
+    let temp = {}
+    columns.map((col, i) => {
+      temp[col] =
+        values[row][colObj.filter(obj => obj.colName === col)[0].colNum]
+      if (row !== 0 && i === columns.length - 1) {
+        result.push(temp)
+      }
+    })
+  })
+  return result
 }
